@@ -1,0 +1,37 @@
+{
+  "name": "packet-tracer-monitorer",
+  "version": "1.0.0",
+  "description": "Packet Tracer Monitorer",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "start": "nuxt start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aqu1tain/Packet-Tracer-Monitorer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Aqu1tain/Packet-Tracer-Monitorer/issues"
+  },
+  "homepage": "https://github.com/Aqu1tain/Packet-Tracer-Monitorer#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^3.1.2",
+    "mongoose": "^8.13.1",
+    "net-snmp": "^3.20.0",
+    "nuxt": "^3.16.1",
+    "nuxt-mongoose": "^1.0.6",
+    "tailwindcss": "^4.0.17"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.17",
+    "@types/jsonwebtoken": "^9.0.9"
+  }
+}
