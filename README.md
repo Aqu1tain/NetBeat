@@ -39,3 +39,7 @@ npm run dev
 ```
 
 Access the app in your browser: http://localhost:3000/login
+
+## License
+
+This project is licensed under the AGPL 3.0 License. All projects using this one must be open-source. Check the [LICENSE](/LICENSE) file to learn more about it.
