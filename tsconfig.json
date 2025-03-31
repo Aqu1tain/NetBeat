@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true, // Allows default imports from CommonJS modules (e.g., bcryptjs, jsonwebtoken)
     "types": ["nuxt"],
     "baseUrl": ".",
   }
