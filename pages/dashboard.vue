@@ -524,11 +524,12 @@
     </div>
 </template>
 
+<!-- The following snippet should replace the script section in dashboard.vue -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '~/utils/auth';
-import { onClickOutside } from '@vueuse/core';
+import { onClickOutside } from '@vueuse/core'
 
 // Auth & routing
 const router = useRouter();
@@ -558,10 +559,12 @@ const adminCount = ref(0);
 // Activity data
 const recentActivity = ref([]);
 
-// Detect clicks outside user menu to close it
-onClickOutside(userMenuRef, () => {
-    isUserMenuOpen.value = false;
-});
+// Detect clicks outside user menu to close it (client-side only)
+if (process.client) {
+    onClickOutside(userMenuRef, () => {
+        isUserMenuOpen.value = false;
+    });
+}
 
 // Toggle user menu
 const toggleUserMenu = () => {
@@ -593,18 +596,20 @@ const activityTypeColor = (type) => {
     return colors[type] || colors.default;
 };
 
-// Fetch tickets based on user role
+// Fetch tickets based on user role (SSR compatible)
 const fetchTickets = async () => {
+    if (process.server) return;
+
     try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
+        // Skip if not authenticated yet
+        if (!user.value) return;
 
         // Endpoint depends on user role
         const endpoint = isAdmin.value ? '/api/tickets/all' : '/api/tickets';
 
         const response = await $fetch(endpoint, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${localStorage.getItem('token')}`
             }
         });
 
@@ -616,13 +621,13 @@ const fetchTickets = async () => {
 
 // Fetch users (admin only)
 const fetchUsers = async () => {
+    if (process.server) return;
     if (!isAdmin.value) return;
 
     try {
-        const token = localStorage.getItem('token');
         const response = await $fetch('/api/users', {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${localStorage.getItem('token')}`
             }
         });
 
@@ -655,12 +660,11 @@ const createTicket = async () => {
 
     try {
         isSubmittingTicket.value = true;
-        const token = localStorage.getItem('token');
 
         await $fetch('/api/tickets', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${localStorage.getItem('token')}`
             },
             body: {
                 title: ticketTitle.value,
@@ -692,12 +696,10 @@ const createTicket = async () => {
 // Update ticket status
 const updateTicketStatus = async (ticketId, newStatus) => {
     try {
-        const token = localStorage.getItem('token');
-
         await $fetch(`/api/tickets/${ticketId}`, {
             method: 'PUT',
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${localStorage.getItem('token')}`
             },
             body: {
                 status: newStatus
@@ -730,12 +732,10 @@ const toggleUserRole = async (userId, newRole) => {
     if (!isAdmin.value) return;
 
     try {
-        const token = localStorage.getItem('token');
-
         await $fetch(`/api/users/${userId}/role`, {
             method: 'PUT',
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${localStorage.getItem('token')}`
             },
             body: {
                 role: newRole
@@ -801,11 +801,14 @@ const filteredTickets = computed(() => {
 
 // Update session time display
 const updateSessionTime = () => {
+    if (process.server) return;
     sessionTime.value = getSessionTimeRemaining();
 };
 
 // Lifecycle hooks
 onMounted(async () => {
+    if (process.server) return;
+
     const isAuthed = await initAuth();
     if (!isAuthed) {
         router.push('/login');
@@ -848,15 +851,21 @@ onMounted(async () => {
 
 onUnmounted(() => {
     // Clear interval when component is destroyed
-    if (sessionRefreshInterval.value) {
+    if (process.client && sessionRefreshInterval.value) {
         clearInterval(sessionRefreshInterval.value);
     }
 });
 
 // Watch for tab changes to load data
 watch(activeTab, async (newTab) => {
+    if (process.server) return;
     if (newTab === 'users' && isAdmin.value) {
         await fetchUsers();
     }
+});
+
+// Define page metadata
+definePageMeta({
+    middleware: ['auth']
 });
 </script>

@@ -1,5 +1,10 @@
 // middleware/auth.ts
 export default defineNuxtRouteMiddleware(async (to) => {
+    // Skip authentication check on server side for now
+    if (process.server) {
+        return;
+    }
+
     const { requireAuth, isAdmin } = useAuth();
 
     // Skip middleware for login and register pages

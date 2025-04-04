@@ -1,5 +1,5 @@
 // server/api/users.get.ts
-import { defineEventHandler } from 'h3';
+import { defineEventHandler, createError } from 'h3';
 import connectToDatabase from '../utils/db';
 import User from '../models/User';
 import { verifyToken } from '../utils/auth';

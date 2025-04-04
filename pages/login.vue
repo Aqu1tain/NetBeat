@@ -74,11 +74,12 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuth } from '~/utils/auth';
 
 const router = useRouter();
-const { login, isAuthenticated } = useAuth();
+const { login, isAuthenticated, initAuth } = useAuth();
 
 // Form state
 const username = ref('');
@@ -91,8 +92,11 @@ const formErrors = reactive({
     password: '',
 });
 
-// Check if already logged in
+// Check if already logged in (client-side only)
 onMounted(async () => {
+    if (process.server) return;
+
+    await initAuth();
     if (isAuthenticated.value) {
         router.push('/dashboard');
     }
@@ -140,4 +144,10 @@ const handleLogin = async () => {
         isLoading.value = false;
     }
 };
+
+// Define page metadata
+definePageMeta({
+    layout: 'default',
+    middleware: [] // No auth middleware for login page
+});
 </script>
