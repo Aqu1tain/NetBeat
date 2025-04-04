@@ -1,5 +1,6 @@
 import { H3Event, getHeader, createError } from 'h3';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
 
 interface DecodedToken extends JwtPayload {
     id: string;
@@ -26,6 +27,7 @@ export function verifyToken(event: H3Event): DecodedToken {
         }
         return decoded as DecodedToken;
     } catch (err) {
-        throw createError({ statusCode: 401, statusMessage: 'Invalid token' });
+        throw createError({ statusCode: 401, statusMessage: 'Invalid token', data: err });
     }
 }
+

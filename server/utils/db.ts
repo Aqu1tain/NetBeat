@@ -7,10 +7,10 @@ if (!MONGODB_URI) {
     throw new Error("Please define the MONGODB_URI environment variable");
 }
 
-// On utilise une variable globale pour éviter de recréer plusieurs connexions lors du hot-reload en dev
-let cached: any = global.mongoose;
+// On utilise une variable globale pour éviter de recréer plusieurs connexions lors du hot reload en dev
+let cached: any = (global as any).mongoose;
 if (!cached) {
-    cached = global.mongoose = { conn: null, promise: null };
+    cached = (global as any).mongoose = { conn: null, promise: null };
 }
 
 async function connectToDatabase() {
