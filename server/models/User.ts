@@ -1,19 +1,21 @@
 // models/User.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
-// Define the User document interface
-interface IUser extends Document {
+// Définition de l'interface pour le document User
+export interface IUser extends Document {
     username: string;
     password: string;
-    _id: mongoose.Types.ObjectId; // Optional: explicitly include _id if used later
+    role: 'user' | 'admin'; // Deux rôles possibles
+    _id: mongoose.Types.ObjectId;
 }
 
-// Define the schema with the interface
+// Définition du schéma en incluant le rôle
 const UserSchema: Schema<IUser> = new Schema({
     username: { type: String, required: true, unique: true },
-    password: { type: String, required: true }, // Hashed password
+    password: { type: String, required: true }, // Mot de passe haché
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
 });
 
-// Export the model, typed as mongoose.Model<IUser>
+// Export du modèle, typé en tant que mongoose.Model<IUser>
 const UserModel = (mongoose.models.User as mongoose.Model<IUser>) || mongoose.model<IUser>('User', UserSchema);
 export default UserModel;
