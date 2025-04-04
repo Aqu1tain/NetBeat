@@ -452,13 +452,650 @@
                         </div>
                     </div>
 
-                    <!-- Admin-Only Tabs -->
-                    <div v-if="isAdmin && activeTab === 'devices'" class="bg-white rounded-lg shadow p-6">
-                        <h2 class="text-xl font-semibold mb-4">Gestion des appareils</h2>
-                        <p class="text-gray-600">Interface de gestion des périphériques réseau.</p>
-                        <!-- Placeholder for devices management UI -->
-                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded mt-4">
-                            Cette fonctionnalité est en cours de développement.
+                    <!-- Admin-Only Devices Tab -->
+                    <div v-if="isAdmin && activeTab === 'devices'" class="bg-white rounded-lg shadow">
+                        <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                            <h3 class="text-lg font-medium">Gestion des appareils</h3>
+
+                            <!-- New Device button -->
+                            <button
+                                  @click="showNewDeviceForm = !showNewDeviceForm"
+                                  class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            >
+                                <span v-if="!showNewDeviceForm">Nouvel appareil</span>
+                                <span v-else>Annuler</span>
+                            </button>
+                        </div>
+
+                        <!-- New Device Form -->
+                        <div v-if="showNewDeviceForm" class="border-b border-gray-200 p-6 bg-gray-50">
+                            <form @submit.prevent="createDevice" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="device-name" class="block text-sm font-medium text-gray-700">Nom</label>
+                                        <input
+                                              id="device-name"
+                                              v-model="deviceForm.name"
+                                              type="text"
+                                              placeholder="Nom de l'appareil"
+                                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                              required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label for="device-ip" class="block text-sm font-medium text-gray-700">Adresse IP</label>
+                                        <input
+                                              id="device-ip"
+                                              v-model="deviceForm.ipAddress"
+                                              type="text"
+                                              placeholder="192.168.1.1"
+                                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                              required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label for="device-community" class="block text-sm font-medium text-gray-700">Communauté SNMP</label>
+                                        <input
+                                              id="device-community"
+                                              v-model="deviceForm.snmpCommunity"
+                                              type="text"
+                                              placeholder="public"
+                                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label for="device-version" class="block text-sm font-medium text-gray-700">Version SNMP</label>
+                                        <select
+                                              id="device-version"
+                                              v-model="deviceForm.snmpVersion"
+                                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        >
+                                            <option value="1">1</option>
+                                            <option value="2c">2c</option>
+                                            <option value="3">3</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="device-description" class="block text-sm font-medium text-gray-700">Description</label>
+                                    <textarea
+                                          id="device-description"
+                                          v-model="deviceForm.description"
+                                          placeholder="Description de l'appareil"
+                                          rows="2"
+                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    ></textarea>
+                                </div>
+
+                                <!-- OIDs Section -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="block text-sm font-medium text-gray-700">OIDs à surveiller</label>
+                                        <button
+                                              type="button"
+                                              @click="addOid"
+                                              class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                                        >
+                                            Ajouter un OID
+                                        </button>
+                                    </div>
+
+                                    <!-- OID Template Picker -->
+                                    <div class="mt-2 mb-4">
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Templates d'OIDs</label>
+                                        <div class="flex flex-wrap gap-2">
+                                            <button
+                                                  type="button"
+                                                  @click="applyDeviceTemplate('system')"
+                                                  class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                                            >
+                                                Système
+                                            </button>
+                                            <button
+                                                  type="button"
+                                                  @click="applyDeviceTemplate('router')"
+                                                  class="px-2 py-1 text-xs bg-indigo-100 text-indigo-800 rounded hover:bg-indigo-200"
+                                            >
+                                                Router
+                                            </button>
+                                            <button
+                                                  type="button"
+                                                  @click="applyDeviceTemplate('switch')"
+                                                  class="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded hover:bg-purple-200"
+                                            >
+                                                Switch
+                                            </button>
+                                            <button
+                                                  type="button"
+                                                  @click="applyDeviceTemplate('host')"
+                                                  class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded hover:bg-green-200"
+                                            >
+                                                Host
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div v-for="(oid, index) in deviceForm.oids" :key="index" class="border p-3 rounded mb-2">
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
+                                            <div>
+                                                <label :for="`oid-value-${index}`" class="block text-xs font-medium text-gray-700">OID</label>
+                                                <input
+                                                      :id="`oid-value-${index}`"
+                                                      v-model="oid.oid"
+                                                      type="text"
+                                                      placeholder="1.3.6.1.2.1.1.1.0"
+                                                      class="mt-1 block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                      required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label :for="`oid-name-${index}`" class="block text-xs font-medium text-gray-700">Nom</label>
+                                                <input
+                                                      :id="`oid-name-${index}`"
+                                                      v-model="oid.name"
+                                                      type="text"
+                                                      placeholder="sysDescr"
+                                                      class="mt-1 block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                      required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label :for="`oid-desc-${index}`" class="block text-xs font-medium text-gray-700">Description</label>
+                                                <input
+                                                      :id="`oid-desc-${index}`"
+                                                      v-model="oid.description"
+                                                      type="text"
+                                                      placeholder="Description du système"
+                                                      class="mt-1 block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <button
+                                                  type="button"
+                                                  @click="testOid(index)"
+                                                  class="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                                            >
+                                                Tester
+                                            </button>
+                                            <button
+                                                  type="button"
+                                                  @click="removeOid(index)"
+                                                  class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                                            >
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                        <div v-if="oid.testResult" class="mt-2 p-2 bg-gray-100 rounded text-xs">
+                                            <p v-if="oid.testResult.error" class="text-red-600">
+                                                Erreur: {{ oid.testResult.error }}
+                                            </p>
+                                            <p v-else class="text-green-600">
+                                                Valeur: {{ oid.testResult.value }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <p v-if="deviceForm.oids.length === 0" class="text-sm text-gray-500 italic">
+                                        Aucun OID ajouté. Cliquez sur "Ajouter un OID" pour commencer.
+                                    </p>
+                                </div>
+
+                                <div class="flex justify-end space-x-3">
+                                    <button
+                                          type="button"
+                                          @click="showNewDeviceForm = false"
+                                          class="px-4 py-2 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                          type="submit"
+                                          class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                                          :disabled="isSubmittingDevice"
+                                    >
+                                        <span v-if="isSubmittingDevice">Création...</span>
+                                        <span v-else>Créer l'appareil</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Device Filters -->
+                        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <!-- Status Filter -->
+                                <div class="flex space-x-2">
+                                    <button
+                                          @click="deviceFilter = 'all'"
+                                          class="px-3 py-1 text-sm rounded-md"
+                                          :class="deviceFilter === 'all' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'"
+                                    >
+                                        Tous
+                                    </button>
+                                    <button
+                                          @click="deviceFilter = 'active'"
+                                          class="px-3 py-1 text-sm rounded-md"
+                                          :class="deviceFilter === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'"
+                                    >
+                                        Actifs
+                                    </button>
+                                    <button
+                                          @click="deviceFilter = 'inactive'"
+                                          class="px-3 py-1 text-sm rounded-md"
+                                          :class="deviceFilter === 'inactive' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'"
+                                    >
+                                        Inactifs
+                                    </button>
+                                </div>
+
+                                <!-- Search -->
+                                <div class="relative">
+                                    <input
+                                          v-model="deviceSearch"
+                                          type="text"
+                                          placeholder="Rechercher..."
+                                          class="pl-8 pr-4 py-1 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                    <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                        <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Devices List -->
+                        <div class="p-6">
+                            <div v-if="filteredDevices.length === 0" class="text-center py-8 text-gray-500">
+                                Aucun appareil à afficher
+                            </div>
+                            <ul v-else class="divide-y divide-gray-200">
+                                <li
+                                      v-for="device in filteredDevices"
+                                      :key="device._id"
+                                      class="py-4"
+                                >
+                                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                                        <!-- Device Info -->
+                                        <div class="flex-1">
+                                            <div class="flex items-start">
+                                                <!-- Status Indicator -->
+                                                <span
+                                                      class="h-2 w-2 mt-2 mr-2 rounded-full"
+                                                      :class="device.status === 'active' ? 'bg-green-500' : 'bg-red-500'"
+                                                ></span>
+
+                                                <!-- Device Content -->
+                                                <div>
+                                                    <h4 class="text-lg font-medium text-gray-900">{{ device.name }}</h4>
+                                                    <p class="mt-1 text-gray-600">{{ device.description }}</p>
+
+                                                    <!-- Device metadata -->
+                                                    <div class="mt-2 flex flex-wrap text-xs text-gray-500 space-x-4">
+                                                        <span>IP: {{ device.ipAddress }}</span>
+                                                        <span>SNMP: v{{ device.snmpVersion }}</span>
+                                                        <span>OIDs: {{ device.oids.length }}</span>
+                                                        <span>Créé le: {{ formatDate(device.createdAt) }}</span>
+                                                        <span>
+                                                            Statut:
+                                                            <span
+                                                                  :class="device.status === 'active' ? 'text-green-600' : 'text-red-600'"
+                                                                  class="font-medium"
+                                                            >
+                                                                {{ device.status === 'active' ? 'Actif' : 'Inactif' }}
+                                                            </span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="mt-4 md:mt-0 flex justify-end space-x-2">
+                                            <button
+                                                  @click="viewDeviceDetails(device._id)"
+                                                  class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                                            >
+                                                Détails
+                                            </button>
+                                            <button
+                                                  @click="pollDevice(device._id)"
+                                                  class="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                                            >
+                                                Interroger
+                                            </button>
+                                            <button
+                                                  @click="editDevice(device._id)"
+                                                  class="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600"
+                                            >
+                                                Modifier
+                                            </button>
+                                            <button
+                                                  @click="confirmDeleteDevice(device._id)"
+                                                  class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                                            >
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Device Details Panel (hidden by default) -->
+                                    <div v-if="device._id === selectedDeviceId" class="mt-4 bg-gray-50 rounded-md overflow-hidden border border-gray-200">
+                                        <div class="flex border-b border-gray-200">
+                                            <button
+                                                  @click="activeDeviceTab = 'details'"
+                                                  class="px-4 py-2 text-sm font-medium transition-colors"
+                                                  :class="activeDeviceTab === 'details' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900'"
+                                            >
+                                                Détails
+                                            </button>
+                                            <button
+                                                  @click="activeDeviceTab = 'monitor'"
+                                                  class="px-4 py-2 text-sm font-medium transition-colors"
+                                                  :class="activeDeviceTab === 'monitor' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-900'"
+                                            >
+                                                Monitoring
+                                            </button>
+                                        </div>
+
+                                        <!-- Details Tab -->
+                                        <div v-if="activeDeviceTab === 'details'" class="p-4">
+                                            <h5 class="font-medium mb-2">Détails de l'appareil</h5>
+
+                                            <!-- OIDs Table -->
+                                            <div class="overflow-x-auto mt-2">
+                                                <table class="min-w-full divide-y divide-gray-200">
+                                                    <thead class="bg-gray-100">
+                                                    <tr>
+                                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">OID</th>
+                                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
+                                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Graphique</th>
+                                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Dernière valeur</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody class="bg-white divide-y divide-gray-200">
+                                                    <tr v-for="(oid, index) in device.oids" :key="index">
+                                                        <td class="px-4 py-2 whitespace-nowrap text-xs text-gray-500">{{ oid.oid }}</td>
+                                                        <td class="px-4 py-2 whitespace-nowrap text-xs">{{ oid.name }}</td>
+                                                        <td class="px-4 py-2 text-xs">{{ oid.description }}</td>
+                                                        <td class="px-4 py-2 whitespace-nowrap text-xs">
+                            <span
+                                  :class="{
+                                    'bg-blue-100 text-blue-800': oid.graphType === 'line',
+                                    'bg-green-100 text-green-800': oid.graphType === 'bar',
+                                    'bg-yellow-100 text-yellow-800': oid.graphType === 'gauge',
+                                    'bg-gray-100 text-gray-800': oid.graphType === 'none' || !oid.graphType
+                                }"
+                                  class="px-2 py-0.5 rounded-full text-xs"
+                            >
+                                {{ oid.graphType === 'line' ? 'Ligne' :
+                                  oid.graphType === 'bar' ? 'Histogramme' :
+                                        oid.graphType === 'gauge' ? 'Jauge' : 'Aucun' }}
+                            </span>
+                                                            <span v-if="oid.alert?.enabled" class="ml-1 px-2 py-0.5 bg-red-100 text-red-800 rounded-full text-xs">
+                                Alerte
+                            </span>
+                                                        </td>
+                                                        <td class="px-4 py-2 whitespace-nowrap text-xs">
+                            <span v-if="devicePollingResults[device._id] && devicePollingResults[device._id][oid.oid]">
+                                {{ devicePollingResults[device._id][oid.oid].value }}
+                            </span>
+                                                            <span v-else class="text-gray-400">Non disponible</span>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <!-- Device Info -->
+                                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div class="bg-white p-3 rounded-md shadow-sm border border-gray-200">
+                                                    <h6 class="text-xs font-medium text-gray-500 uppercase mb-2">Informations</h6>
+                                                    <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                                        <dt class="text-gray-500">IP</dt>
+                                                        <dd class="text-gray-900">{{ device.ipAddress }}</dd>
+
+                                                        <dt class="text-gray-500">Communauté SNMP</dt>
+                                                        <dd class="text-gray-900">{{ device.snmpCommunity }}</dd>
+
+                                                        <dt class="text-gray-500">Version SNMP</dt>
+                                                        <dd class="text-gray-900">{{ device.snmpVersion }}</dd>
+
+                                                        <dt class="text-gray-500">Statut</dt>
+                                                        <dd>
+                        <span
+                              :class="device.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                              class="px-2 py-0.5 rounded-full text-xs"
+                        >
+                            {{ device.status === 'active' ? 'Actif' : 'Inactif' }}
+                        </span>
+                                                        </dd>
+                                                    </dl>
+                                                </div>
+
+                                                <div class="bg-white p-3 rounded-md shadow-sm border border-gray-200">
+                                                    <h6 class="text-xs font-medium text-gray-500 uppercase mb-2">Monitoring</h6>
+                                                    <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                                        <dt class="text-gray-500">Intervalle</dt>
+                                                        <dd class="text-gray-900">{{ device.monitoringInterval || 5 }} minutes</dd>
+
+                                                        <dt class="text-gray-500">Dernière vérification</dt>
+                                                        <dd class="text-gray-900">{{ device.lastMonitored ? formatDate(device.lastMonitored) : 'Jamais' }}</dd>
+
+                                                        <dt class="text-gray-500">Dernier ping</dt>
+                                                        <dd>
+                        <span v-if="device.lastPingStatus">
+                            <span
+                                  :class="device.lastPingStatus.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                  class="px-2 py-0.5 rounded-full text-xs"
+                            >
+                                {{ device.lastPingStatus.success ? 'OK' : 'Échec' }}
+                            </span>
+                            <span v-if="device.lastPingStatus.responseTime" class="ml-1 text-gray-900">
+                                {{ device.lastPingStatus.responseTime.toFixed(1) }} ms
+                            </span>
+                        </span>
+                                                            <span v-else class="text-gray-500">Non testé</span>
+                                                        </dd>
+                                                    </dl>
+                                                </div>
+                                            </div>
+
+                                            <!-- Buttons -->
+                                            <div class="flex justify-end space-x-3 mt-4">
+                                                <button
+                                                      @click="pingDeviceFromDetails(device._id)"
+                                                      class="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                                                >
+                                                    Ping
+                                                </button>
+                                                <button
+                                                      @click="monitorDeviceFromDetails(device._id)"
+                                                      class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                                                >
+                                                    Actualiser
+                                                </button>
+                                                <button
+                                                      @click="selectedDeviceId = null"
+                                                      class="px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
+                                                >
+                                                    Fermer
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Monitor Tab -->
+                                        <div v-if="activeDeviceTab === 'monitor'" class="bg-white">
+                                            <DeviceMonitor
+                                                  :device="device"
+                                                  @update:device="updateDeviceFromMonitor"
+                                                  @edit-device="editDevice(device._id)"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Device Edit Form (hidden by default) -->
+                                    <div v-if="device._id === editingDeviceId" class="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200">
+                                        <h5 class="font-medium mb-4">Modifier l'appareil</h5>
+
+                                        <form @submit.prevent="updateDevice(device._id)" class="space-y-4">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Nom</label>
+                                                    <input
+                                                          v-model="editDeviceForm.name"
+                                                          type="text"
+                                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                          required
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Adresse IP</label>
+                                                    <input
+                                                          v-model="editDeviceForm.ipAddress"
+                                                          type="text"
+                                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                          required
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Communauté SNMP</label>
+                                                    <input
+                                                          v-model="editDeviceForm.snmpCommunity"
+                                                          type="text"
+                                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Version SNMP</label>
+                                                    <select
+                                                          v-model="editDeviceForm.snmpVersion"
+                                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    >
+                                                        <option value="1">1</option>
+                                                        <option value="2c">2c</option>
+                                                        <option value="3">3</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Status</label>
+                                                    <select
+                                                          v-model="editDeviceForm.status"
+                                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    >
+                                                        <option value="active">Actif</option>
+                                                        <option value="inactive">Inactif</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Intervalle de monitoring (minutes)</label>
+                                                    <input
+                                                          v-model.number="editDeviceForm.monitoringInterval"
+                                                          type="number"
+                                                          min="1"
+                                                          max="1440"
+                                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Description</label>
+                                                <textarea
+                                                      v-model="editDeviceForm.description"
+                                                      rows="2"
+                                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                ></textarea>
+                                            </div>
+
+                                            <!-- Edit OIDs Section -->
+                                            <div>
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <label class="block text-sm font-medium text-gray-700">OIDs à surveiller</label>
+                                                    <button
+                                                          type="button"
+                                                          @click="addEditOid"
+                                                          class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                                                    >
+                                                        Ajouter un OID
+                                                    </button>
+                                                </div>
+
+                                                <!-- OID Template Picker for Edit Form -->
+                                                <div class="mt-2 mb-3">
+                                                    <div class="flex flex-wrap gap-2">
+                                                        <button
+                                                              type="button"
+                                                              @click="applyEditDeviceTemplate('system')"
+                                                              class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                                                        >
+                                                            Système
+                                                        </button>
+                                                        <button
+                                                              type="button"
+                                                              @click="applyEditDeviceTemplate('router')"
+                                                              class="px-2 py-1 text-xs bg-indigo-100 text-indigo-800 rounded hover:bg-indigo-200"
+                                                        >
+                                                            Router
+                                                        </button>
+                                                        <button
+                                                              type="button"
+                                                              @click="applyEditDeviceTemplate('switch')"
+                                                              class="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded hover:bg-purple-200"
+                                                        >
+                                                            Switch
+                                                        </button>
+                                                        <button
+                                                              type="button"
+                                                              @click="applyEditDeviceTemplate('host')"
+                                                              class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded hover:bg-green-200"
+                                                        >
+                                                            Host
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- OID Form Components -->
+                                                <OidConfigForm
+                                                      v-for="(oid, index) in editDeviceForm.oids"
+                                                      :key="index"
+                                                      :value="oid"
+                                                      :device-ip="editDeviceForm.ipAddress"
+                                                      :device-community="editDeviceForm.snmpCommunity"
+                                                      :device-version="editDeviceForm.snmpVersion"
+                                                      @update:value="updateEditOid(index, $event)"
+                                                      @remove="removeEditOid(index)"
+                                                />
+
+                                                <div v-if="editDeviceForm.oids.length === 0" class="text-center py-4 text-gray-500 bg-white rounded-md border border-gray-200">
+                                                    <p class="text-sm">Aucun OID configuré. Utilisez un template ou ajoutez manuellement des OIDs.</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex justify-end space-x-3">
+                                                <button
+                                                      type="button"
+                                                      @click="editingDeviceId = null"
+                                                      class="px-3 py-1 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                                                >
+                                                    Annuler
+                                                </button>
+                                                <button
+                                                      type="submit"
+                                                      class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                                                      :disabled="isSubmittingEdit"
+                                                >
+                                                    <span v-if="isSubmittingEdit">Mise à jour...</span>
+                                                    <span v-else>Mettre à jour</span>
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
 
@@ -521,15 +1158,30 @@
                 </div>
             </div>
         </div>
+
+        <!-- SNMP Query Modal -->
+        <SNMPQueryViewer
+              :show="showSnmpQueryModal"
+              :device="selectedQueryDevice"
+              @close="showSnmpQueryModal = false"
+              @update-device="handleDeviceUpdate"
+        />
     </div>
 </template>
 
-<!-- The following snippet should replace the script section in dashboard.vue -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '~/utils/auth';
-import { onClickOutside } from '@vueuse/core'
+import { onClickOutside } from '@vueuse/core';
+import SNMPQueryViewer from '~/components/SNMPQueryViewer.vue';
+import DeviceMonitor from '~/components/DeviceMonitor.vue';
+import OidConfigForm from '~/components/OidConfigForm.vue';
+import { getOidTemplateByType } from '~/utils/snmp';
+
+const activeDeviceTab = ref('details');
+const showPingResults = ref(false);
+const pingResults = ref(null);
 
 // Auth & routing
 const router = useRouter();
@@ -558,6 +1210,41 @@ const adminCount = ref(0);
 
 // Activity data
 const recentActivity = ref([]);
+
+// Device management state
+const devicesList = ref([]);
+const deviceFilter = ref('all');
+const deviceSearch = ref('');
+const showNewDeviceForm = ref(false);
+const isSubmittingDevice = ref(false);
+const selectedDeviceId = ref(null);
+const editingDeviceId = ref(null);
+const devicePollingResults = ref({});
+const isSubmittingEdit = ref(false);
+const showSnmpQueryModal = ref(false);
+const selectedQueryDevice = ref(null);
+
+// Device form for creating a new device
+const deviceForm = ref({
+    name: '',
+    ipAddress: '',
+    snmpCommunity: 'public',
+    snmpVersion: '2c',
+    description: '',
+    oids: []
+});
+
+// Device form for editing an existing device
+const editDeviceForm = ref({
+    name: '',
+    ipAddress: '',
+    snmpCommunity: 'public',
+    snmpVersion: '2c',
+    status: 'active',
+    description: '',
+    monitoringInterval: 5, // Default to 5 minutes
+    oids: []
+});
 
 // Detect clicks outside user menu to close it (client-side only)
 if (process.client) {
@@ -591,6 +1278,10 @@ const activityTypeColor = (type) => {
         'ticket_closed': 'bg-green-500',
         'ticket_reopened': 'bg-yellow-500',
         'user_login': 'bg-purple-500',
+        'device_created': 'bg-indigo-500',
+        'device_updated': 'bg-cyan-500',
+        'device_deleted': 'bg-red-500',
+        'device_polled': 'bg-teal-500',
         'default': 'bg-gray-500'
     };
     return colors[type] || colors.default;
@@ -636,6 +1327,21 @@ const fetchUsers = async () => {
         adminCount.value = usersList.value.filter(u => u.role === 'admin').length;
     } catch (error) {
         console.error('Error fetching users:', error);
+    }
+};
+
+// Fetch devices from API
+const fetchDevices = async () => {
+    if (process.server) return;
+    try {
+        const response = await $fetch('/api/devices', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        devicesList.value = response.devices || [];
+    } catch (error) {
+        console.error('Error fetching devices:', error);
     }
 };
 
@@ -765,7 +1471,471 @@ const confirmCloseTicket = (ticketId) => {
     }
 };
 
+// Device management functions
+
+// Add a new OID to the form
+const addOid = () => {
+    deviceForm.value.oids.push({
+        oid: '',
+        name: '',
+        description: '',
+        testResult: null
+    });
+};
+
+// Remove an OID from the form
+const removeOid = (index) => {
+    deviceForm.value.oids.splice(index, 1);
+};
+
+// Test an OID against the specified device
+const testOid = async (index) => {
+    const oid = deviceForm.value.oids[index];
+    if (!oid.oid || !deviceForm.value.ipAddress) {
+        alert('Veuillez spécifier un OID et une adresse IP valides');
+        return;
+    }
+
+    try {
+        const response = await $fetch('/api/devices/poll', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            },
+            body: {
+                ipAddress: deviceForm.value.ipAddress,
+                community: deviceForm.value.snmpCommunity,
+                version: deviceForm.value.snmpVersion,
+                oids: [oid.oid]
+            }
+        });
+
+        if (response.success && response.results && response.results.length > 0) {
+            const result = response.results[0];
+            if (result.error) {
+                deviceForm.value.oids[index].testResult = { error: result.error };
+            } else {
+                deviceForm.value.oids[index].testResult = { value: result.value };
+            }
+        }
+    } catch (error) {
+        console.error('Error testing OID:', error);
+        deviceForm.value.oids[index].testResult = { error: error.message || 'Failed to test OID' };
+    }
+};
+
+// Create a new device
+// Updated createDevice function with enhanced fields
+const createDevice = async () => {
+    if (!deviceForm.value.name || !deviceForm.value.ipAddress) {
+        alert('Veuillez remplir tous les champs obligatoires');
+        return;
+    }
+
+    try {
+        isSubmittingDevice.value = true;
+
+        // Clean up testResult from oids and prepare OIDs with alerts
+        const oids = deviceForm.value.oids.map(({ oid, name, description, graphType, alert }) => ({
+            oid,
+            name,
+            description,
+            graphType: graphType || 'line',
+            alert: {
+                enabled: alert?.enabled || false,
+                threshold: alert?.threshold || 0,
+                condition: alert?.condition || 'above'
+            }
+        }));
+
+        await $fetch('/api/devices', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            },
+            body: {
+                name: deviceForm.value.name,
+                ipAddress: deviceForm.value.ipAddress,
+                snmpCommunity: deviceForm.value.snmpCommunity,
+                snmpVersion: deviceForm.value.snmpVersion,
+                description: deviceForm.value.description,
+                monitoringInterval: deviceForm.value.monitoringInterval || 5,
+                oids
+            }
+        });
+
+        // Reset form and refresh devices
+        deviceForm.value = {
+            name: '',
+            ipAddress: '',
+            snmpCommunity: 'public',
+            snmpVersion: '2c',
+            description: '',
+            monitoringInterval: 5,
+            oids: []
+        };
+        showNewDeviceForm.value = false;
+        await fetchDevices();
+
+        // Add to recent activity
+        recentActivity.value.unshift({
+            type: 'device_created',
+            message: `Nouvel appareil créé: "${deviceForm.value.name}"`,
+            timestamp: new Date()
+        });
+
+    } catch (error) {
+        console.error('Error creating device:', error);
+        alert('Erreur lors de la création de l\'appareil');
+    } finally {
+        isSubmittingDevice.value = false;
+    }
+};
+
+const pingDeviceFromDetails = async (deviceId) => {
+    const device = devicesList.value.find(d => d._id === deviceId);
+    if (!device) return;
+
+    try {
+        const response = await $fetch('/api/devices/ping', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            },
+            body: {
+                ipAddress: device.ipAddress
+            }
+        });
+
+        // Store ping results
+        pingResults.value = response;
+        showPingResults.value = true;
+
+        // Update device with ping status
+        const updatedDevice = {
+            ...device,
+            lastPingStatus: {
+                timestamp: new Date(),
+                success: response.success,
+                responseTime: response.stats?.avgTime,
+                packetLoss: response.stats?.packetLoss
+            }
+        };
+
+        // Update device status based on ping result
+        if (!response.success && device.status === 'active') {
+            updatedDevice.status = 'inactive';
+        }
+
+        // Update device in the list
+        const index = devicesList.value.findIndex(d => d._id === deviceId);
+        if (index !== -1) {
+            devicesList.value[index] = updatedDevice;
+        }
+
+        // Update device in API
+        await $fetch(`/api/devices/${deviceId}`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            },
+            body: {
+                lastPingStatus: updatedDevice.lastPingStatus,
+                status: updatedDevice.status
+            }
+        });
+
+    } catch (error) {
+        console.error('Error pinging device:', error);
+        alert('Erreur lors du ping de l\'appareil');
+    }
+};
+
+const monitorDeviceFromDetails = async (deviceId) => {
+    const device = devicesList.value.find(d => d._id === deviceId);
+    if (!device) return;
+
+    try {
+        // Call monitor API with all OIDs for this device
+        const oidsToMonitor = device.oids.map(oid => oid.oid);
+
+        if (oidsToMonitor.length === 0) {
+            alert('Aucun OID configuré pour cet appareil');
+            return;
+        }
+
+        const response = await $fetch('/api/devices/monitor', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            },
+            body: {
+                deviceId,
+                oids: oidsToMonitor
+            }
+        });
+
+        if (response.success) {
+            // Store polling results
+            const results = {};
+            response.results.forEach(result => {
+                results[result.oid] = {
+                    value: result.value,
+                    error: !!result.error
+                };
+            });
+
+            devicePollingResults.value = {
+                ...devicePollingResults.value,
+                [deviceId]: results
+            };
+
+            // Update device with last monitored timestamp
+            const updatedDevice = {
+                ...device,
+                lastMonitored: response.timestamp,
+                status: 'active' // Set status to active if monitoring succeeds
+            };
+
+            // Update device in the list
+            const index = devicesList.value.findIndex(d => d._id === deviceId);
+            if (index !== -1) {
+                devicesList.value[index] = updatedDevice;
+            }
+
+            // Update device in API
+            await $fetch(`/api/devices/${deviceId}`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+                body: {
+                    lastMonitored: response.timestamp,
+                    status: 'active'
+                }
+            });
+
+            // Show success message
+            alert('Données actualisées avec succès');
+        }
+    } catch (error) {
+        console.error('Error monitoring device:', error);
+        alert('Erreur lors de l\'actualisation des données');
+    }
+};
+
+const updateDeviceFromMonitor = (updatedDevice) => {
+    // Find and update the device in the list
+    const index = devicesList.value.findIndex(d => d._id === updatedDevice._id);
+    if (index !== -1) {
+        devicesList.value[index] = updatedDevice;
+    }
+};
+
+// View device details
+const viewDeviceDetails = (deviceId) => {
+    if (selectedDeviceId.value === deviceId) {
+        selectedDeviceId.value = null; // Toggle off if already selected
+    } else {
+        selectedDeviceId.value = deviceId;
+        editingDeviceId.value = null; // Close edit form if open
+    }
+};
+
+// Open the SNMP query modal for a device
+const openSnmpQueryModal = (deviceId) => {
+    const device = devicesList.value.find(d => d._id === deviceId);
+    if (!device) return;
+
+    selectedQueryDevice.value = device;
+    showSnmpQueryModal.value = true;
+};
+
+// Handle device update from SNMP query modal
+const handleDeviceUpdate = async (updatedDevice) => {
+    try {
+        await $fetch(`/api/devices/${updatedDevice._id}`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            },
+            body: {
+                oids: updatedDevice.oids
+            }
+        });
+
+        // Refresh devices
+        await fetchDevices();
+
+        // Add to recent activity
+        recentActivity.value.unshift({
+            type: 'device_updated',
+            message: `OIDs de l'appareil "${updatedDevice.name}" mis à jour`,
+            timestamp: new Date()
+        });
+
+    } catch (error) {
+        console.error('Error updating device:', error);
+        alert('Erreur lors de la mise à jour des OIDs');
+    }
+};
+
+// Edit a device
+const editDevice = (deviceId) => {
+    const device = devicesList.value.find(d => d._id === deviceId);
+    if (!device) return;
+
+    // Initialize edit form with enhanced device data
+    editDeviceForm.value = {
+        name: device.name,
+        ipAddress: device.ipAddress,
+        snmpCommunity: device.snmpCommunity,
+        snmpVersion: device.snmpVersion,
+        status: device.status,
+        description: device.description,
+        monitoringInterval: device.monitoringInterval || 5,
+        oids: device.oids.map(oid => ({
+            ...oid,
+            // Ensure alert object exists with defaults if not present
+            alert: {
+                enabled: oid.alert?.enabled || false,
+                threshold: oid.alert?.threshold || 0,
+                condition: oid.alert?.condition || 'above'
+            }
+        }))
+    };
+
+    editingDeviceId.value = deviceId;
+    selectedDeviceId.value = null; // Close details if open
+    activeDeviceTab.value = 'details'; // Reset tab for next view
+};
+
+const updateEditOid = (index, updatedOid) => {
+    editDeviceForm.value.oids[index] = updatedOid;
+};
+
+const pollDevice = (deviceId) => {
+    selectedDeviceId.value = deviceId;
+    activeDeviceTab.value = 'monitor';
+};
+// Add a new OID to the edit form
+const addEditOid = () => {
+    editDeviceForm.value.oids.push({
+        oid: '',
+        name: '',
+        description: ''
+    });
+};
+
+// Remove an OID from the edit form
+const removeEditOid = (index) => {
+    editDeviceForm.value.oids.splice(index, 1);
+};
+
+// Update a device
+const updateDevice = async (deviceId) => {
+    try {
+        isSubmittingEdit.value = true;
+
+        await $fetch(`/api/devices/${deviceId}`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            },
+            body: editDeviceForm.value
+        });
+
+        // Reset and refresh
+        editingDeviceId.value = null;
+        await fetchDevices();
+
+        // Add to recent activity
+        recentActivity.value.unshift({
+            type: 'device_updated',
+            message: `Appareil "${editDeviceForm.value.name}" mis à jour`,
+            timestamp: new Date()
+        });
+
+    } catch (error) {
+        console.error('Error updating device:', error);
+        alert('Erreur lors de la mise à jour de l\'appareil');
+    } finally {
+        isSubmittingEdit.value = false;
+    }
+};
+
+// Confirm and delete a device
+const confirmDeleteDevice = async (deviceId) => {
+    const device = devicesList.value.find(d => d._id === deviceId);
+    if (!device) return;
+
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer l'appareil "${device.name}" ?`)) {
+        return;
+    }
+
+    try {
+        await $fetch(`/api/devices/${deviceId}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        // Close panels if open for this device
+        if (selectedDeviceId.value === deviceId) selectedDeviceId.value = null;
+        if (editingDeviceId.value === deviceId) editingDeviceId.value = null;
+
+        // Refresh devices
+        await fetchDevices();
+
+        // Add to recent activity
+        recentActivity.value.unshift({
+            type: 'device_deleted',
+            message: `Appareil "${device.name}" supprimé`,
+            timestamp: new Date()
+        });
+
+    } catch (error) {
+        console.error('Error deleting device:', error);
+        alert('Erreur lors de la suppression de l\'appareil');
+    }
+};
+
+// Apply OID templates
+const applyDeviceTemplate = (templateType) => {
+    // Get the appropriate template
+    const templateOids = getOidTemplateByType(templateType);
+
+    // If already have some OIDs, confirm before replacing
+    if (deviceForm.value.oids.length > 0) {
+        if (!confirm('Cela remplacera les OIDs existants. Continuer?')) {
+            return;
+        }
+    }
+
+    // Apply the template
+    deviceForm.value.oids = JSON.parse(JSON.stringify(templateOids));
+};
+
+// Add a similar function for the edit form
+const applyEditDeviceTemplate = (templateType) => {
+    // Get the appropriate template
+    const templateOids = getOidTemplateByType(templateType);
+
+    // If already have some OIDs, confirm before replacing
+    if (editDeviceForm.value.oids.length > 0) {
+        if (!confirm('Cela remplacera les OIDs existants. Continuer?')) {
+            return;
+        }
+    }
+
+    // Apply the template
+    editDeviceForm.value.oids = JSON.parse(JSON.stringify(templateOids));
+};
+
 // Computed properties
+
+// Tickets
 const openTicketsCount = computed(() =>
       tickets.value.filter(t => t.status === 'open').length
 );
@@ -799,6 +1969,29 @@ const filteredTickets = computed(() => {
     return result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 });
 
+// Devices
+const filteredDevices = computed(() => {
+    let result = [...devicesList.value];
+
+    // Filter by status
+    if (deviceFilter.value !== 'all') {
+        result = result.filter(device => device.status === deviceFilter.value);
+    }
+
+    // Filter by search
+    if (deviceSearch.value) {
+        const searchLower = deviceSearch.value.toLowerCase();
+        result = result.filter(device =>
+              device.name.toLowerCase().includes(searchLower) ||
+              device.description?.toLowerCase().includes(searchLower) ||
+              device.ipAddress.includes(searchLower)
+        );
+    }
+
+    // Sort by created date, newest first
+    return result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+});
+
 // Update session time display
 const updateSessionTime = () => {
     if (process.server) return;
@@ -823,6 +2016,9 @@ onMounted(async () => {
 
     if (isAdmin.value) {
         await fetchUsers();
+        if (activeTab.value === 'devices') {
+            await fetchDevices();
+        }
     }
 
     // Update session time every minute
@@ -861,6 +2057,9 @@ watch(activeTab, async (newTab) => {
     if (process.server) return;
     if (newTab === 'users' && isAdmin.value) {
         await fetchUsers();
+    }
+    if (newTab === 'devices' && isAdmin.value) {
+        await fetchDevices();
     }
 });
 
