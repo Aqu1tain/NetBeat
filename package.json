@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Aqu1tain/Packet-Tracer-Monitorer#readme",
   "dependencies": {
+    "@pinia/nuxt": "^0.10.1",
     "bcryptjs": "^3.0.2",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^3.1.2",
