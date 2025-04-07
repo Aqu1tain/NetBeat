@@ -9,8 +9,11 @@
             </div>
 
             <div class="popup-actions">
-                <button @click="updateApp" class="btn-update">Mettre à jour</button>
-                <button @click="showPopup = false" class="btn-cancel">Ignorer</button>
+                <button @click="updateApp" class="btn-update" :disabled="isUpdating">
+                    <span v-if="isUpdating" class="spinner"></span>
+                    <span>{{ isUpdating ? 'Mise à jour en cours...' : 'Mettre à jour' }}</span>
+                </button>
+                <button @click="showPopup = false" class="btn-cancel" :disabled="isUpdating">Ignorer</button>
             </div>
         </div>
     </div>
@@ -23,6 +26,7 @@ import { useAppVersion } from '~/composables/useAppVersion';
 const currentVersion = ref(useAppVersion());
 const latestVersion = ref('');
 const showPopup = ref(false);
+const isUpdating = ref(false);
 
 const checkForUpdates = async () => {
     try {
@@ -41,6 +45,9 @@ const checkForUpdates = async () => {
 };
 
 const updateApp = async () => {
+    if (isUpdating.value) return;
+
+    isUpdating.value = true;
     try {
         const response = await $fetch('/api/update', { method: 'POST' });
         if (response.success) {
@@ -51,8 +58,9 @@ const updateApp = async () => {
         }
     } catch (error) {
         alert('Erreur lors de la mise à jour : ' + error.message);
+        isUpdating.value = false;
     }
-    showPopup.value = false;
+    // Ne fermez pas le popup en cas d'erreur, il sera fermé après rechargement en cas de succès
 };
 
 onMounted(() => {
@@ -125,6 +133,11 @@ button {
     background-color: #3a80d2;
 }
 
+.btn-update:disabled {
+    background-color: #78a7e4;
+    cursor: not-allowed;
+}
+
 .btn-cancel {
     background-color: #f1f1f1;
     color: #333;
@@ -132,5 +145,26 @@ button {
 
 .btn-cancel:hover {
     background-color: #e4e4e4;
+}
+
+.btn-cancel:disabled {
+    background-color: #f1f1f1;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 </style>
