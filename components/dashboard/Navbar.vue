@@ -4,7 +4,7 @@
         <div class="container mx-auto px-4 py-3">
             <div class="flex justify-between items-center">
                 <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-800">Packet Tracer Monitorer</h1>
+                    <h1 class="text-xl font-bold font-[PT_Serif] text-gray-800">NetBeat</h1>
 
                     <!-- Admin Badge -->
                     <span v-if="isAdmin" class="ml-3 px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">
@@ -13,13 +13,6 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <!-- Session Info -->
-                    <div class="hidden md:flex items-center text-sm">
-            <span v-if="sessionTime" class="text-gray-600">
-              Session: {{ sessionTime }} min
-            </span>
-                    </div>
-
                     <!-- User Info & Logout -->
                     <UserMenu v-if="user" :user="user" @logout="$emit('logout')" />
                     <div v-else class="flex items-center space-x-2">
@@ -47,10 +40,6 @@ defineProps({
     isAdmin: {
         type: Boolean,
         default: false
-    },
-    sessionTime: {
-        type: [Number, String],
-        default: null
     }
 });
 

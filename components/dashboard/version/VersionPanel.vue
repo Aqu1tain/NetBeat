@@ -124,6 +124,9 @@ import { ref, onMounted, computed, defineComponent } from 'vue';
 import MarkdownIt from 'markdown-it';
 import { useAppVersion } from '~/composables/useAppVersion';
 
+const config = useRuntimeConfig();
+const gitRepo = config.public.gitRepo;
+
 // Initialize markdown-it with Tailwind-friendly options
 const md = new MarkdownIt({
     breaks: true,
@@ -219,7 +222,7 @@ const fetchReleases = async () => {
     error.value = null;
 
     try {
-        const response = await fetch('https://api.github.com/repos/Aqu1tain/Packet-Tracer-Monitorer/releases', {
+        const response = await fetch(`https://api.github.com/repos/${gitRepo}/releases`, {
             headers: { 'Accept': 'application/vnd.github.v3+json' },
         });
 

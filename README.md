@@ -1,8 +1,8 @@
-# Packet-Tracer-Monitor
-Packet Tracer Monitor is a web-app made to interact via SNMP with GNS3 networks. 
+# NetBeat
+NetBeat is a web-app made to interact via SNMP with GNS3 networks. 
 It runs on the host machine. 
 
-Note that the app is currently under development.
+Please note that the app is currently under development.
 
 Contributions and pull requests are open, starting after April 15, 2025.
 Feel free to fork the project and PR on it.
@@ -18,13 +18,15 @@ Learn Nuxt: [Feel free to check the official docs](https://nuxt.com/docs/guide),
 - [Net-Snmp v3.20.0](https://www.npmjs.com/package/net-snmp)
 - Mongoose v8.13.1 (MongoDB package for Node)
 
+Make sure to have a local instance of MongoDb Running, or that you have a Mongo Cluster.
+
 ---
 
 ## Installation
 
 Clone the repository: 
 ```zsh
-git clone https://www.github.com/Aqu1tain/Packet-Tracer-Monitor.git
+git clone https://www.github.com/Aqu1tain/NetBeat.git
 ```
 Next, __navigate into the project folder__, then:
 ```zsh

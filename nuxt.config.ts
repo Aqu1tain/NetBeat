@@ -11,6 +11,11 @@ export default defineNuxtConfig({
   plugins: [
     '~/plugins/auth'
   ],
+  runtimeConfig: {
+    public: {
+      gitRepo: process.env.GITREPO || 'Aqu1tain/Packet-Tracer-Monitorer', // Fallback value
+    },
+  },
   vite: {
     plugins: [
       tailwindcss(),

@@ -28,9 +28,12 @@ const latestVersion = ref('');
 const showPopup = ref(false);
 const isUpdating = ref(false);
 
+const config = useRuntimeConfig();
+const gitRepo = config.public.gitRepo;
+
 const checkForUpdates = async () => {
     try {
-        const response = await fetch('https://api.github.com/repos/Aqu1tain/Packet-Tracer-Monitorer/releases/latest', {
+        const response = await fetch(`https://api.github.com/repos/${gitRepo}/releases/latest`, {
             headers: { 'Accept': 'application/vnd.github.v3+json' },
         });
         const data = await response.json();
