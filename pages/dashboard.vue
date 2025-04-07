@@ -53,6 +53,10 @@
                               v-if="isAdmin && activeTab === 'users'"
                         />
 
+                        <VersionPanel
+                            v-if="activeTab === 'version'"
+                        />
+
                         <!-- Admin-Only Logs Tab -->
                         <div v-if="isAdmin && activeTab === 'logs'" class="bg-white rounded-lg shadow p-6">
                             <h2 class="text-xl font-semibold mb-4">Journaux système</h2>
@@ -93,6 +97,7 @@ import DashboardStats from '~/components/dashboard/stats/DashboardStats.vue';
 import TicketsPanel from '~/components/dashboard/tickets/TicketsPanel.vue';
 import DevicesPanel from '~/components/dashboard/devices/DevicesPanel.vue';
 import UsersPanel from '~/components/dashboard/users/UsersPanel.vue';
+import VersionPanel from '~/components/dashboard/version/VersionPanel.vue';
 import SNMPQueryViewer from '~/components/SNMPQueryViewer.vue';
 
 // Auth & routing

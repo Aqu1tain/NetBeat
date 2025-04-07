@@ -71,6 +71,20 @@
                     </div>
                 </template>
 
+                <div class="pt-2 mt-2 border-t border-gray-200">
+                    <div class="font-medium text-gray-500 uppercase tracking-wider text-xs mt-2 mb-2">System</div>
+                    <a
+                          href="#version"
+                          @click.prevent="$emit('update:active-tab', 'version')"
+                          class="flex items-center px-3 py-2 rounded-md transition-colors"
+                          :class="activeTab === 'version' ? 'bg-blue-100 text-blue-900' : 'text-gray-700 hover:bg-gray-100'"
+                    >
+                        <span class="mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-marked-icon lucide-book-marked"><path d="M10 2v8l3-3 3 3V2"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
+                        </span>
+                        <p>Notes de version</p>
+                    </a>
+                </div>
             </nav>
         </div>
     </div>
