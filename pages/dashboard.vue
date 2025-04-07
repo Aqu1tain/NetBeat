@@ -13,14 +13,6 @@
         </div>
 
         <template v-else>
-            <!-- Navbar -->
-            <DashboardNavbar
-                  :user="user"
-                  :is-admin="isAdmin"
-                  :session-time="sessionTime"
-                  @logout="logout"
-            />
-
             <!-- Main Content with Sidebar -->
             <div class="container mx-auto px-4 py-6">
                 <div class="flex flex-col md:flex-row">
@@ -91,7 +83,6 @@ import { useDevicesStore } from '~/stores/devices';
 import { useUsersStore } from '~/stores/users';
 import { useActivityStore } from '~/stores/activity';
 
-import DashboardNavbar from '~/components/dashboard/Navbar.vue';
 import DashboardSidebar from '~/components/dashboard/Sidebar.vue';
 import DashboardStats from '~/components/dashboard/stats/DashboardStats.vue';
 import TicketsPanel from '~/components/dashboard/tickets/TicketsPanel.vue';
@@ -181,10 +172,6 @@ onMounted(async () => {
 
         // Load data
         await loadInitialData();
-
-        // Update session time every minute
-        updateSessionTime();
-        sessionRefreshInterval.value = setInterval(updateSessionTime, 60000);
     } catch (error) {
         console.error('Error initializing dashboard:', error);
         isLoading.value = false;
@@ -211,6 +198,7 @@ watch(activeTab, async (newTab) => {
 
 // Define page metadata
 definePageMeta({
-    middleware: ['auth']
+    middleware: ['auth'],
+    layout: 'main',
 });
 </script>

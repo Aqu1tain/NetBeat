@@ -4,7 +4,7 @@
         <div class="container mx-auto px-4 py-3">
             <div class="flex justify-between items-center">
                 <div class="flex items-center">
-                    <h1 class="text-xl font-bold font-[PT_Serif] text-gray-800">NetBeat</h1>
+                    <NuxtLink to="/dashboard"><h1 class="text-xl font-bold font-[PT_Serif] text-gray-800">NetBeat</h1></NuxtLink>
 
                     <!-- Admin Badge -->
                     <span v-if="isAdmin" class="ml-3 px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">

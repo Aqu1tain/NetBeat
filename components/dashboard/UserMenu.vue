@@ -23,8 +23,8 @@
                 Connecté en tant que <span class="font-semibold">{{ user?.username }}</span>
                 <p class="text-xs text-gray-500">Rôle: {{ user?.role === 'admin' ? 'Administrateur' : 'Utilisateur' }}</p>
             </div>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mon profil</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Paramètres</a>
+            <!-- a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mon profil</a-->
+            <NuxtLink to="/userSettings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Paramètres</NuxtLink>
             <button
                   @click="$emit('logout')"
                   class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
